@@ -1,0 +1,47 @@
+/*
+ * Niijima Home: what the page adds on top of @niijima/design. Colours, fonts and motion all
+ * come from its --nj-* tokens, so the persona switch re-colours everything.
+ */
+html {
+	background: var(--nj-bg);
+	color-scheme: dark;
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+body {
+	margin: 0;
+	min-height: 100dvh;
+	overflow-x: hidden;
+}
+a {
+	color: inherit;
+}
+kbd {
+	display: inline-block;
+	min-width: 1.5em;
+	padding: 2px 5px 1px;
+	background: var(--nj-ink);
+	color: var(--nj-paper);
+	border: 1px solid var(--nj-paper-muted);
+	font: 700 11px/1.2 var(--nj-font-body);
+	letter-spacing: 0.08em;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+/* Money stays off screen in public: hidden or shown, decided before the first paint (app.html). */
+html[data-money='hidden'] .nj-money,
+html[data-money='shown'] .nj-money-mask {
+	display: none;
+}
+html:not([data-money]) .nj-money-mask {
+	display: none;
+}
+@media (max-width: 759.98px) {
+	html:not([data-money]) .nj-money {
+		display: none;
+	}
+	html:not([data-money]) .nj-money-mask {
+		display: inline;
+	}
+}

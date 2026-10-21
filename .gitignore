@@ -1,5 +1,22 @@
 node_modules/
+
+# Build output
 .svelte-kit/
 build/
+
+# Runtime data (the favicon cache)
 data/
+
+# Your own settings, art and secrets stay out of git
+/config.yml
 .env
+.env.*
+!.env.example
+/assets/*
+!/assets/README.md
+
+# OS and tools
+.DS_Store
+Thumbs.db
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*

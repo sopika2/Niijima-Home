@@ -1,0 +1,48 @@
+{
+	"name": "niijima-home",
+	"private": true,
+	"version": "0.1.0",
+	"description": "Niijima Home: the browser start page of the Niijima Network, for PC and phone.",
+	"type": "module",
+	"packageManager": "pnpm@10.28.0",
+	"engines": {
+		"node": ">=22.12"
+	},
+	"scripts": {
+		"dev": "vite dev --port 5182",
+		"build": "vite build",
+		"preview": "vite preview --port 5182",
+		"start": "node build",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
+		"lint": "prettier --check . && eslint .",
+		"format": "prettier --write .",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"verify": "pnpm lint && pnpm check && pnpm test && pnpm build"
+	},
+	"dependencies": {
+		"yaml": "^2.9.1",
+		"zod": "^4.6.7"
+	},
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"@niijima/design": "github:sopika2/Niijima-Design#ab9ae651e5a280f23565f11fb1975ff25d78304b",
+		"@sveltejs/adapter-node": "^5.5.7",
+		"@sveltejs/kit": "^2.70.3",
+		"@sveltejs/vite-plugin-svelte": "^7.3.1",
+		"@types/node": "^22.19.0",
+		"eslint": "^10.13.0",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-svelte": "^3.23.1",
+		"globals": "^17.13.0",
+		"prettier": "^3.9.10",
+		"prettier-plugin-svelte": "^4.1.1",
+		"svelte": "^5.57.2",
+		"svelte-check": "^4.7.7",
+		"typescript": "~6.0.3",
+		"typescript-eslint": "^8.71.2",
+		"vite": "^8.3.5",
+		"vitest": "^4.1.12"
+	}
+}
