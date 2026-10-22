@@ -3,7 +3,7 @@
 	 * The money from Treasure: the total in big numerals, the month-end forecast and the next
 	 * bills. Hide/Show is remembered on this device; hidden by default on phones.
 	 */
-	import { moneyText as text } from '../money.ts';
+	import { moneyText as text, toggleMoney as toggle } from '../money.ts';
 	import type { TreasuryView } from '../types.ts';
 
 	interface Props {
@@ -11,17 +11,6 @@
 	}
 
 	let { view }: Props = $props();
-
-	function toggle() {
-		const root = document.documentElement;
-		const next = root.dataset.money === 'hidden' ? 'shown' : 'hidden';
-		root.dataset.money = next;
-		try {
-			localStorage.setItem('nj-home:money', next);
-		} catch {
-			// Storage blocked: it still switches for now.
-		}
-	}
 </script>
 
 <div class="treasury">

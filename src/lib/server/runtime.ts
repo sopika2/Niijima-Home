@@ -17,6 +17,11 @@ export interface Settings {
 	readonly calendarToken: string | null;
 	readonly treasureUrl: string | null;
 	readonly summaryToken: string | null;
+	/** Where the server asks the Compendium (Outline); may be an internal Docker address. */
+	readonly outlineUrl: string;
+	readonly outlineToken: string | null;
+	/** The Compendium's address in a browser, for the links. */
+	readonly outlinePublicUrl: string;
 }
 
 export interface Runtime {
@@ -52,6 +57,8 @@ const withoutSlash = (value: string | null) => value?.replace(/\/+$/, '') ?? nul
 function readSettings(): Settings {
 	const mode = optional(env.ACCESS_MODE) ?? 'off';
 	if (mode !== 'discord' && mode !== 'off') throw new Error('ACCESS_MODE must be discord or off');
+	const outlinePublicUrl =
+		withoutSlash(optional(env.OUTLINE_PUBLIC_URL)) ?? 'https://compendium.niijimasisters.com';
 	return {
 		accessMode: mode,
 		publicUrl: withoutSlash(optional(env.PUBLIC_URL)),
@@ -60,7 +67,10 @@ function readSettings(): Settings {
 		calendarUrl: withoutSlash(optional(env.CALENDAR_URL)),
 		calendarToken: optional(env.CALENDAR_TOKEN),
 		treasureUrl: withoutSlash(optional(env.TREASURE_URL)),
-		summaryToken: optional(env.SUMMARY_TOKEN)
+		summaryToken: optional(env.SUMMARY_TOKEN),
+		outlineUrl: withoutSlash(optional(env.OUTLINE_URL)) ?? outlinePublicUrl,
+		outlineToken: optional(env.OUTLINE_TOKEN),
+		outlinePublicUrl
 	};
 }
 
@@ -180,7 +190,7 @@ function boot(): Runtime {
 
 	log(
 		'boot',
-		`ready · sign-in ${settings.accessMode} · calendar ${settings.calendarUrl ? 'on' : 'off'} · treasury ${settings.treasureUrl && settings.summaryToken ? 'on' : 'off'}`
+		`ready · sign-in ${settings.accessMode} · calendar ${settings.calendarUrl ? 'on' : 'off'} · treasury ${settings.treasureUrl && settings.summaryToken ? 'on' : 'off'} · compendium ${settings.outlineToken ? 'on' : 'off'}`
 	);
 	return {
 		version,

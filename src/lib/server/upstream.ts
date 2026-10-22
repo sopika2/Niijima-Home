@@ -180,17 +180,24 @@ export class HttpError extends Error {
 	}
 }
 
-/** GET some JSON, with a bearer token if given. Throws HttpError for anything but 2xx. */
+/**
+ * GET some JSON, with a bearer token if given; with a `body`, POST it as JSON instead (Outline's
+ * API is all POST). Throws HttpError for anything but 2xx.
+ */
 export async function fetchJson(
 	url: string,
-	options: { signal: AbortSignal; token?: string | undefined }
+	options: { signal: AbortSignal; token?: string | undefined; body?: unknown }
 ): Promise<unknown> {
+	const post = options.body !== undefined;
 	const response = await fetch(url, {
+		method: post ? 'POST' : 'GET',
 		signal: options.signal,
 		headers: {
 			accept: 'application/json',
+			...(post ? { 'content-type': 'application/json' } : {}),
 			...(options.token ? { authorization: `Bearer ${options.token}` } : {})
-		}
+		},
+		...(post ? { body: JSON.stringify(options.body) } : {})
 	});
 	if (!response.ok) {
 		await response.body?.cancel();

@@ -74,6 +74,52 @@ export interface TreasuryView {
 	readonly missingRates: readonly string[];
 }
 
+/** The strip's three slots: Calendar, Treasure and the Compendium, at a glance. */
+export type StripSlot = 'calendar' | 'treasure' | 'compendium';
+
+export interface GlanceEvent {
+	/** "Today", "Tomorrow", "Fri 24 Oct". */
+	readonly day: string;
+	/** "09:30", "Now", or null for all day. */
+	readonly time: string | null;
+	readonly title: string;
+	readonly owner: Owner;
+	/** That day in Calendar. */
+	readonly href: string;
+}
+
+export interface TreasureGlance {
+	readonly total: Money;
+	readonly endOfMonth: Money | null;
+	/** Budgets past their limit, and budgets close to it. */
+	readonly over: number;
+	readonly near: number;
+	readonly nextBill: {
+		readonly name: string;
+		readonly when: string;
+		readonly amount: Money;
+	} | null;
+}
+
+export interface GlanceDocument {
+	readonly title: string;
+	readonly href: string;
+	/** "5 min ago", "yesterday", "12 Oct". */
+	readonly ago: string;
+	readonly collection: string | null;
+}
+
+export interface StripView {
+	readonly slots: readonly StripSlot[];
+	readonly calendar: Panel<readonly GlanceEvent[]> | null;
+	readonly treasure: Panel<TreasureGlance> | null;
+	readonly compendium: Panel<readonly GlanceDocument[]> | null;
+	/** Where each slot's name takes you: today in Calendar, Treasure, the wiki. */
+	readonly links: Readonly<Record<StripSlot, string>>;
+	/** The wiki's search page; the box sends `query`. */
+	readonly compendiumSearch: string;
+}
+
 export interface Greeting {
 	readonly name: string;
 	readonly arcana: string;
@@ -83,7 +129,7 @@ export interface Greeting {
 	readonly art: string | null;
 }
 
-export type SectionId = 'search' | 'network' | 'links' | 'today' | 'treasury';
+export type SectionId = 'search' | 'strip' | 'network' | 'links' | 'today' | 'treasury';
 
 /** One row of the page: a full-width section, or a main column next to a side column. */
 export type Row =

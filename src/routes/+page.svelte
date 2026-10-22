@@ -8,6 +8,7 @@
 	import Notice from '$lib/components/Notice.svelte';
 	import SearchBox from '$lib/components/SearchBox.svelte';
 	import SectionTitle from '$lib/components/SectionTitle.svelte';
+	import Strip from '$lib/components/Strip.svelte';
 	import Treasury from '$lib/components/Treasury.svelte';
 	import type { SectionId } from '$lib/types.ts';
 	import type { PageProps } from './$types';
@@ -52,6 +53,8 @@
 {#snippet section(id: SectionId)}
 	{#if id === 'search'}
 		<SearchBox {...data.search} />
+	{:else if id === 'strip'}
+		{#if data.strip.slots.length > 0}<Strip strip={data.strip} />{/if}
 	{:else if id === 'network'}
 		<section class="block" aria-label="Network">
 			<SectionTitle text="Network" />

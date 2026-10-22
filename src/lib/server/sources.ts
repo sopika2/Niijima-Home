@@ -1,15 +1,26 @@
 import type { Persona } from '@niijima/design';
 import { z } from 'zod';
-import type { Panel, ServiceStatus, TreasuryView } from '../types.ts';
+import type {
+	AgendaDay,
+	GlanceDocument,
+	GlanceEvent,
+	Panel,
+	ServiceStatus,
+	TreasureGlance,
+	TreasuryView
+} from '../types.ts';
 import { weatherLabel } from '../weather.ts';
 import type { Config, ServiceConfig } from './config.ts';
+import { compendiumDocs, nextEvents, treasureGlance } from './glance.ts';
+import { recentDocuments } from './outline.ts';
 import { agenda, money } from './present.ts';
 import type { Runtime } from './runtime.ts';
 import { fetchJson, type Fetched } from './upstream.ts';
 
 /**
  * The live parts of the page, each through the upstream cache: weather from Open-Meteo, the
- * up/down dots, Today from Niijima Calendar and the Treasury from Treasure. Tokens are used
+ * up/down dots, Today and the strip's Calendar from Niijima Calendar, the Treasury and the
+ * strip's Treasure from Treasure, and the strip's Compendium from the Outline wiki. Tokens are used
  * here and never leave the server.
  */
 
@@ -101,29 +112,52 @@ const upcomingSchema = z.object({
 	)
 });
 
-export async function today(app: Runtime, config: Config, persona: Persona, now: Date) {
+/** The raw upcoming events, through the cache; the strip and Today share one answer. */
+function upcoming(app: Runtime, config: Config, persona: Persona) {
 	const { calendarUrl, calendarToken } = app.settings;
-	if (!calendarUrl) {
-		return {
-			state: 'off',
-			hint: 'Set CALENDAR_URL and CALENDAR_TOKEN in .env to see your days here.'
-		} as const;
-	}
+	if (!calendarUrl) return null;
 	const url = `${calendarUrl}/api/upcoming?days=${config.today.days}&persona=${persona}`;
-	const result = await app.upstream.get(
-		`calendar:${persona}:${config.today.days}`,
-		async (signal) =>
-			upcomingSchema.parse(await fetchJson(url, { signal, token: calendarToken ?? undefined }))
-				.events
+	return app.upstream.get(`calendar:${persona}:${config.today.days}`, async (signal) =>
+		upcomingSchema
+			.parse(await fetchJson(url, { signal, token: calendarToken ?? undefined }))
+			.events.map((event) => ({ ...event, allDay: event.allDay ?? false }))
 	);
+}
+
+const CALENDAR_OFF = 'Set CALENDAR_URL and CALENDAR_TOKEN in .env to see your days here.';
+
+export async function today(
+	app: Runtime,
+	config: Config,
+	persona: Persona,
+	now: Date
+): Promise<Panel<AgendaDay[]>> {
+	const result = await upcoming(app, config, persona);
+	if (!result) return { state: 'off', hint: CALENDAR_OFF };
+	return panel(
+		result,
+		(events) => agenda(events, now, config.timezone, config.today.limit),
+		'Calendar',
+		'CALENDAR_TOKEN'
+	);
+}
+
+/** The strip's Calendar slot: the next few events, today and tomorrow first. */
+export async function calendarGlance(
+	app: Runtime,
+	config: Config,
+	persona: Persona,
+	now: Date
+): Promise<Panel<GlanceEvent[]>> {
+	const result = await upcoming(app, config, persona);
+	if (!result) return { state: 'off', hint: 'Add CALENDAR_URL and CALENDAR_TOKEN to .env.' };
 	return panel(
 		result,
 		(events) =>
-			agenda(
-				events.map((event) => ({ ...event, allDay: event.allDay ?? false })),
-				now,
-				config.timezone,
-				config.today.limit
+			nextEvents(
+				agenda(events, now, config.timezone, config.strip.events),
+				config.strip.events,
+				config.today.link
 			),
 		'Calendar',
 		'CALENDAR_TOKEN'
@@ -139,6 +173,7 @@ const summarySchema = z.object({
 	next_bills: z
 		.array(z.object({ name: z.string(), date: z.string(), amount: z.number() }))
 		.catch([]),
+	budgets_over_warn: z.array(z.object({ category: z.string(), percent: z.number() })).catch([]),
 	verdicts: z.number().int().catch(0)
 });
 
@@ -152,39 +187,79 @@ const billDate = (date: string) =>
 			})
 		: date;
 
+function summary(app: Runtime, persona: Persona) {
+	const { treasureUrl, summaryToken } = app.settings;
+	if (!treasureUrl || !summaryToken) return null;
+	const url = `${treasureUrl}/api/summary?persona=${persona}`;
+	return app.upstream.get(`treasury:${persona}`, async (signal) => {
+		const answer = summarySchema.parse(await fetchJson(url, { signal, token: summaryToken }));
+		const cash = (minor: number) => money(minor, answer.base_currency, answer.minor_units);
+		return {
+			total: cash(answer.total),
+			endOfMonth: answer.projected ? cash(answer.projected.end_of_month) : null,
+			bills: answer.next_bills.map((bill) => ({
+				name: bill.name,
+				when: billDate(bill.date),
+				amount: cash(bill.amount)
+			})),
+			budgets: answer.budgets_over_warn,
+			verdicts: answer.verdicts,
+			missingRates: answer.missing_rates
+		};
+	});
+}
+
+const TREASURE_OFF = 'Set TREASURE_URL and SUMMARY_TOKEN in .env to see your money here.';
+
 export async function treasury(
 	app: Runtime,
 	config: Config,
 	persona: Persona
 ): Promise<Panel<TreasuryView>> {
-	const { treasureUrl, summaryToken } = app.settings;
-	if (!treasureUrl || !summaryToken) {
-		return {
-			state: 'off',
-			hint: 'Set TREASURE_URL and SUMMARY_TOKEN in .env to see your money here.'
-		};
+	const result = await summary(app, persona);
+	if (!result) return { state: 'off', hint: TREASURE_OFF };
+	return panel(
+		result,
+		(view): TreasuryView => ({
+			total: view.total,
+			endOfMonth: view.endOfMonth,
+			bills: view.bills.slice(0, config.treasury.bills),
+			verdicts: view.verdicts,
+			missingRates: view.missingRates
+		}),
+		'Treasure',
+		'SUMMARY_TOKEN'
+	);
+}
+
+/** The strip's Treasure slot: the total, the month-end forecast and budgets near their limit. */
+export async function treasureGlanceFor(
+	app: Runtime,
+	persona: Persona
+): Promise<Panel<TreasureGlance>> {
+	const result = await summary(app, persona);
+	if (!result) return { state: 'off', hint: 'Add TREASURE_URL and SUMMARY_TOKEN to .env.' };
+	return panel(result, treasureGlance, 'Treasure', 'SUMMARY_TOKEN');
+}
+
+/** The strip's Compendium slot: the wiki pages changed most recently. */
+export async function compendiumGlance(
+	app: Runtime,
+	config: Config,
+	now: Date
+): Promise<Panel<GlanceDocument[]>> {
+	const { outlineUrl, outlineToken, outlinePublicUrl } = app.settings;
+	if (!outlineToken) {
+		return { state: 'off', hint: 'Add OUTLINE_TOKEN to .env.' };
 	}
-	const url = `${treasureUrl}/api/summary?persona=${persona}`;
-	const result = await app.upstream.get(`treasury:${persona}`, async (signal) =>
-		summarySchema.parse(await fetchJson(url, { signal, token: summaryToken }))
+	const count = config.strip.documents;
+	const result = await app.upstream.get(`compendium:${count}`, (signal) =>
+		recentDocuments(outlineUrl, outlineToken, count, signal)
 	);
 	return panel(
 		result,
-		(summary): TreasuryView => {
-			const cash = (minor: number) => money(minor, summary.base_currency, summary.minor_units);
-			return {
-				total: cash(summary.total),
-				endOfMonth: summary.projected ? cash(summary.projected.end_of_month) : null,
-				bills: summary.next_bills.slice(0, config.treasury.bills).map((bill) => ({
-					name: bill.name,
-					when: billDate(bill.date),
-					amount: cash(bill.amount)
-				})),
-				verdicts: summary.verdicts,
-				missingRates: summary.missing_rates
-			};
-		},
-		'Treasure',
-		'SUMMARY_TOKEN'
+		(recent) => compendiumDocs(recent, outlinePublicUrl, now.getTime(), config.timezone, count),
+		'Compendium',
+		'OUTLINE_TOKEN'
 	);
 }
