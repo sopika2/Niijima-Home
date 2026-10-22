@@ -28,12 +28,12 @@ services:
       - proxy
     labels:
       - traefik.enable=true
-      - traefik.docker.network=${TRAEFIK_NETWORK:-proxy}
+      - traefik.docker.network=${TRAEFIK_NETWORK:-zipline_default}
       - traefik.http.routers.home.rule=Host(`${APP_HOST:-home.niijimasisters.com}`) || Host(`${MAKOTO_HOST:-makoto.niijimasisters.com}`) || Host(`${SAE_HOST:-sae.niijimasisters.com}`)
       - traefik.http.routers.home.entrypoints=${TRAEFIK_ENTRYPOINT:-web}
       - traefik.http.services.home.loadbalancer.server.port=3000
 
 networks:
   proxy:
-    name: ${TRAEFIK_NETWORK:-proxy}
+    name: ${TRAEFIK_NETWORK:-zipline_default}
     external: true
