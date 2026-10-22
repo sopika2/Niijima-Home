@@ -175,9 +175,7 @@ export const configSchema = z.strictObject({
 		])
 		.default({ latitude: 47.4979, longitude: 19.0402 }),
 	/** Hosts that always show one sister's page. Any other host follows the persona switch. */
-	hosts: z
-		.record(hostName, persona)
-		.default({ 'makoto.niijimasisters.com': 'makoto', 'sae.niijimasisters.com': 'sae' }),
+	hosts: z.record(hostName, persona).default({}),
 	/** Which sections show, in this order. Leave one out to hide it. */
 	sections: z
 		.array(z.enum(SECTIONS))

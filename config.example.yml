@@ -16,12 +16,9 @@ weather:
   latitude: 47.4979
   longitude: 19.0402
 
-# Hosts that always show one sister's page (her colours, her greeting, her links,
-# her calendar and money). Any other host (home.niijimasisters.com) follows the
-# Makoto | Sae switch, which every Niijima site shares.
-hosts:
-  makoto.niijimasisters.com: makoto
-  sae.niijimasisters.com: sae
+# The page follows the Makoto | Sae switch that every Niijima site shares. To pin a
+# sister to an extra address routed here, list it, e.g. { start.example.com: sae }.
+hosts: {}
 
 # Which sections show, top to bottom. Leave one out to hide it.
 #   search    the big search box

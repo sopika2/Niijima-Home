@@ -7,9 +7,9 @@ a search box, a small strip with your next events from Niijima Calendar, the mon
 and the latest pages of the Compendium wiki, the Network's services with live up/down dots, and
 your own links.
 
-It also answers on `makoto.niijimasisters.com` and `sae.niijimasisters.com`: each is that
-sister's own start page (her colours, greeting, links, events and money), while `home.` follows
-the Makoto | Sae switch that every Niijima site shares.
+It follows the Makoto | Sae switch that every Niijima site shares: her colours, greeting,
+links, events and money. (`makoto.` and `sae.niijimasisters.com` are the sisters' own pages,
+not this app.)
 
 ## What's on the page
 
@@ -106,8 +106,7 @@ The three hosts are routed by one Traefik rule (`APP_HOST`, `MAKOTO_HOST`, `SAE_
 
 **Homepage** (the Home button, and new windows):
 Settings → **Home** → _Homepage and new windows_ → **Custom URLs…** → enter
-`https://home.niijimasisters.com` (or your sister's own address,
-`https://makoto.niijimasisters.com`).
+`https://home.niijimasisters.com`.
 
 **New tab page**: Firefox has no setting for a custom new-tab address, and the old
 `browser.newtab.url` in `about:config` was removed years ago (Firefox 41), so it does nothing.
