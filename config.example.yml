@@ -51,7 +51,7 @@ strip:
 host:
   makoto:
     name: Makoto
-    art: /assets/host-makoto.webp
+    art: /assets/menu-makoto.png
     arcana: II
     arcana_name: The Priestess
     lines:
@@ -71,7 +71,7 @@ host:
         - Ready when you are.
   sae:
     name: Sae
-    art: /assets/host-sae.webp
+    art: /assets/menu-sae.png
     arcana: XX
     arcana_name: Judgement
     lines:

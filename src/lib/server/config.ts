@@ -207,7 +207,7 @@ export const configSchema = z.strictObject({
 		.strictObject({
 			makoto: character({
 				name: 'Makoto',
-				art: '/assets/host-makoto.webp',
+				art: '/assets/menu-makoto.png',
 				arcana: 'II',
 				arcana_name: 'The Priestess',
 				lines: {
@@ -220,7 +220,7 @@ export const configSchema = z.strictObject({
 			}),
 			sae: character({
 				name: 'Sae',
-				art: '/assets/host-sae.webp',
+				art: '/assets/menu-sae.png',
 				arcana: 'XX',
 				arcana_name: 'Judgement',
 				lines: {
