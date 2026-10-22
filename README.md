@@ -77,8 +77,8 @@ Then:
    Docker network, set `OUTLINE_URL` to its container (e.g. `http://outline:3000`); otherwise
    the server asks `https://compendium.niijimasisters.com`, which must then not be behind
    Cloudflare Access for it.
-5. **Art.** Drop the host pictures in `./assets` (`host-makoto.webp`, `host-sae.webp`, or the
-   names you set in `config.yml`). They never go into git.
+5. **Art.** The host pictures come from `~/niijima-data/assets`, the folder every Niijima app and the landing page share (set `NIIJIMA_ASSETS` in `.env` to use another): `menu-makoto.png` and `menu-sae.png`, or the
+   names you set in `config.yml`. They never go into git.
 6. **Links.** Edit `links:` in `config.yml`. Save and reload the page: config changes are picked
    up by themselves, no restart.
 
@@ -90,12 +90,12 @@ A `config.yml` copied from an older example lists `sections: [search, network, l
 treasury]`, which keeps the big sections and leaves the strip out. Change it to
 `sections: [search, strip, network, links]` (or delete the line) to get the strip.
 
-| To change              | Edit         | Then                           |
-| ---------------------- | ------------ | ------------------------------ |
-| Links, sections, lines | `config.yml` | Reload the page                |
-| Art                    | `./assets`   | Reload the page                |
-| Tokens, sign-in        | `.env`       | `docker compose up -d`         |
-| The app itself         | `git pull`   | `docker compose up -d --build` |
+| To change              | Edit                    | Then                           |
+| ---------------------- | ----------------------- | ------------------------------ |
+| Links, sections, lines | `config.yml`            | Reload the page                |
+| Art                    | `~/niijima-data/assets` | Reload the page                |
+| Tokens, sign-in        | `.env`                  | `docker compose up -d`         |
+| The app itself         | `git pull`              | `docker compose up -d --build` |
 
 The three hosts are routed by one Traefik rule (`APP_HOST`, `MAKOTO_HOST`, `SAE_HOST` in
 `.env`); it wins over the landing page's wildcard catch-all.

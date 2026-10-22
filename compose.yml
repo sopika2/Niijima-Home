@@ -21,7 +21,8 @@ services:
       # The icon cache for your links.
       - ./data:/app/data
       # Your own pictures: the host characters' art, custom link icons.
-      - ./assets:/app/assets:ro
+      # Character art, shared by every Niijima app (the landing page uses the same folder).
+      - ${NIIJIMA_ASSETS:-${HOME}/niijima-data/assets}:/app/assets:ro
     networks:
       # Traefik's network; Treasure and Calendar are on it too, so the app reaches
       # them directly (http://niijima-treasure:3000, http://niijima-calendar:3000).
