@@ -15,6 +15,20 @@ describe('config.yml', () => {
 		expect(config.links.shared.length).toBeGreaterThan(0);
 	});
 
+	it('gives a config.yml from before the strip the strip', () => {
+		expect(parseConfig('sections: [search, network, links, today, treasury]').sections).toEqual([
+			'search',
+			'strip',
+			'network',
+			'links'
+		]);
+		expect(parseConfig('sections: [search, links, today]').sections).toEqual([
+			'search',
+			'links',
+			'today'
+		]);
+	});
+
 	it('has sensible defaults for an empty file', () => {
 		const config = defaultConfig();
 		expect(config.sections).toEqual(['search', 'strip', 'network', 'links']);

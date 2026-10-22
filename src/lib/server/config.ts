@@ -11,6 +11,7 @@ import { ENGINES } from '../search.ts';
 export const SECTIONS = ['search', 'strip', 'network', 'links', 'today', 'treasury'] as const;
 export type SectionId = (typeof SECTIONS)[number];
 /** What shows when config.yml doesn't say: the strip, not the big Today and Treasury. */
+const OLD_DEFAULT_SECTIONS = ['search', 'network', 'links', 'today', 'treasury'];
 export const DEFAULT_SECTIONS: SectionId[] = ['search', 'strip', 'network', 'links'];
 
 export const STRIP_SLOTS = ['calendar', 'treasure', 'compendium'] as const;
@@ -181,6 +182,11 @@ export const configSchema = z.strictObject({
 	sections: z
 		.array(z.enum(SECTIONS))
 		.refine((list) => new Set(list).size === list.length, { message: 'lists a section twice' })
+		// The list every config.yml had before the strip: read it as today's default, so an
+		// untouched config gets the strip without editing.
+		.transform((list) =>
+			list.join() === OLD_DEFAULT_SECTIONS.join() ? [...DEFAULT_SECTIONS] : list
+		)
 		.default([...DEFAULT_SECTIONS]),
 	/** The small panel near the top: Calendar, Treasure and the Compendium at a glance. */
 	strip: z
