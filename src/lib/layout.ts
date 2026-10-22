@@ -1,8 +1,9 @@
 import type { Row, SectionId } from './types.ts';
 
-/** Search and Network span the page; on wide screens Links sits left, Today and Treasury right. */
+/** Search, the strip and Network span the page; on wide screens Links sits left, Today and Treasury right. */
 const PLACE: Record<SectionId, 'full' | 'main' | 'side'> = {
 	search: 'full',
+	strip: 'full',
 	network: 'full',
 	links: 'main',
 	today: 'side',

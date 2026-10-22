@@ -8,9 +8,13 @@ import { ENGINES } from '../search.ts';
  * typo in a later edit keeps the last good config running and logs the problem.
  */
 
-export const SECTIONS = ['search', 'network', 'links', 'today', 'treasury'] as const;
+export const SECTIONS = ['search', 'strip', 'network', 'links', 'today', 'treasury'] as const;
 export type SectionId = (typeof SECTIONS)[number];
+/** What shows when config.yml doesn't say: the strip, not the big Today and Treasury. */
+const OLD_DEFAULT_SECTIONS = ['search', 'network', 'links', 'today', 'treasury'];
+export const DEFAULT_SECTIONS: SectionId[] = ['search', 'strip', 'network', 'links'];
 
+export const STRIP_SLOTS = ['calendar', 'treasure', 'compendium'] as const;
 const persona = z.enum(['makoto', 'sae']);
 
 const httpUrl = z
@@ -178,7 +182,26 @@ export const configSchema = z.strictObject({
 	sections: z
 		.array(z.enum(SECTIONS))
 		.refine((list) => new Set(list).size === list.length, { message: 'lists a section twice' })
-		.default([...SECTIONS]),
+		// The list every config.yml had before the strip: read it as today's default, so an
+		// untouched config gets the strip without editing.
+		.transform((list) =>
+			list.join() === OLD_DEFAULT_SECTIONS.join() ? [...DEFAULT_SECTIONS] : list
+		)
+		.default([...DEFAULT_SECTIONS]),
+	/** The small panel near the top: Calendar, Treasure and the Compendium at a glance. */
+	strip: z
+		.strictObject({
+			/** Which slots show, left to right (first on a phone). Leave one out to hide it. */
+			slots: z
+				.array(z.enum(STRIP_SLOTS))
+				.refine((list) => new Set(list).size === list.length, { message: 'lists a slot twice' })
+				.default([...STRIP_SLOTS]),
+			/** How many upcoming events. */
+			events: z.number().int().min(1).max(5).default(3),
+			/** How many recently updated wiki pages (a phone shows at most three). */
+			documents: z.number().int().min(1).max(8).default(5)
+		})
+		.prefault({}),
 	/** Who greets you: Makoto on her page, Sae on hers. */
 	host: z
 		.strictObject({

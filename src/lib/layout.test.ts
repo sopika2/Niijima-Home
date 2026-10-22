@@ -18,6 +18,15 @@ describe('section rows', () => {
 		]);
 	});
 
+	it('gives the strip the full width, under the search', () => {
+		expect(rowsOf(['search', 'strip', 'network', 'links'])).toEqual([
+			{ kind: 'full', section: 'search', order: 0 },
+			{ kind: 'full', section: 'strip', order: 1 },
+			{ kind: 'full', section: 'network', order: 2 },
+			{ kind: 'split', order: 3, main: [{ section: 'links', order: 3 }], side: [] }
+		]);
+	});
+
 	it('keeps the configured order across rows', () => {
 		const rows = rowsOf(['today', 'search', 'links']);
 		expect(rows.map((row) => row.kind)).toEqual(['split', 'full', 'split']);

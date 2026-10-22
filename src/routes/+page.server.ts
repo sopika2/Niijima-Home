@@ -5,8 +5,16 @@ import { linkGroups } from '$lib/server/links.ts';
 import { greetingLine, wallClock } from '$lib/server/present.ts';
 import { isHandheld } from '$lib/server/request.ts';
 import { runtime } from '$lib/server/runtime.ts';
-import { serviceStatus, today, treasury, weather } from '$lib/server/sources.ts';
-import type { Greeting, Tile } from '$lib/types.ts';
+import {
+	calendarGlance,
+	compendiumGlance,
+	serviceStatus,
+	today,
+	treasureGlanceFor,
+	treasury,
+	weather
+} from '$lib/server/sources.ts';
+import type { Greeting, StripView, Tile } from '$lib/types.ts';
 import type { PageServerLoad } from './$types';
 
 /**
@@ -21,8 +29,17 @@ export const load: PageServerLoad = async ({ locals, request, depends }) => {
 	const persona = locals.persona;
 	const now = new Date();
 	const shown = new Set(config.sections);
+	const slots = new Set(shown.has('strip') ? config.strip.slots : []);
 
-	const [weatherText, tiles, todayPanel, treasuryPanel] = await Promise.all([
+	const [
+		weatherText,
+		tiles,
+		todayPanel,
+		treasuryPanel,
+		calendarSlot,
+		treasureSlot,
+		compendiumSlot
+	] = await Promise.all([
 		weather(app, config),
 		shown.has('network')
 			? Promise.all(
@@ -38,8 +55,25 @@ export const load: PageServerLoad = async ({ locals, request, depends }) => {
 				)
 			: [],
 		shown.has('today') ? today(app, config, persona, now) : null,
-		shown.has('treasury') ? treasury(app, config, persona) : null
+		shown.has('treasury') ? treasury(app, config, persona) : null,
+		slots.has('calendar') ? calendarGlance(app, config, persona, now) : null,
+		slots.has('treasure') ? treasureGlanceFor(app, persona) : null,
+		slots.has('compendium') ? compendiumGlance(app, config, now) : null
 	]);
+
+	const day = wallClock(now, config.timezone).date;
+	const strip: StripView = {
+		slots: shown.has('strip') ? config.strip.slots : [],
+		calendar: calendarSlot,
+		treasure: treasureSlot,
+		compendium: compendiumSlot,
+		links: {
+			calendar: `${config.today.link.replace(/\/+$/, '')}/day/${day}`,
+			treasure: config.treasury.link,
+			compendium: app.settings.outlinePublicUrl
+		},
+		compendiumSearch: `${app.settings.outlinePublicUrl}/search`
+	};
 
 	const host = config.host[persona];
 	const greeting: Greeting = {
@@ -63,6 +97,7 @@ export const load: PageServerLoad = async ({ locals, request, depends }) => {
 			placeholder: config.search.placeholder,
 			autofocus: !isHandheld(request.headers.get('user-agent'))
 		},
+		strip,
 		tiles,
 		groups: shown.has('links')
 			? linkGroups(config, persona, { favicons: app.favicons, assetsDir: app.paths.assets })

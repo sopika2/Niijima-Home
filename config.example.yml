@@ -23,10 +23,26 @@ hosts:
   makoto.niijimasisters.com: makoto
   sae.niijimasisters.com: sae
 
-# Which sections show, top to bottom. Leave one out to hide it. Search and
-# Network span the page; on a wide screen Links sits on the left and Today and
-# Treasury on the right. On a phone they stack in exactly this order.
-sections: [search, network, links, today, treasury]
+# Which sections show, top to bottom. Leave one out to hide it.
+#   search    the big search box
+#   strip     Calendar, Treasure and the Compendium at a glance, in one small
+#             panel (three cells on a computer, three swipeable cards on a phone)
+#   network   the Niijima services with their up/down dots
+#   links     your bookmarks
+#   today     the bigger Calendar section, day by day        (off by default:
+#   treasury  the bigger Treasure section, with the bills     the strip has both)
+# Search, the strip and Network span the page; on a wide screen Links sits on
+# the left and Today and Treasury on the right. On a phone they stack in exactly
+# this order. To get the big sections back: [search, strip, network, links, today, treasury]
+sections: [search, strip, network, links]
+
+# The strip near the top. Calendar opens today in Niijima Calendar, Treasure opens
+# Treasure (amounts follow the Hide/Show switch), the Compendium lists the wiki
+# pages changed last and has a box that searches the wiki.
+strip:
+  slots: [calendar, treasure, compendium] # left to right; leave one out to hide it
+  events: 3 # upcoming events (1–5)
+  documents: 5 # recently updated wiki pages (1–8; a phone shows at most 3)
 
 # Who greets you. Art is a picture you put in the ./assets folder next to this
 # file (PNG or WebP; a missing .webp falls back to the .png of the same name).
@@ -160,16 +176,18 @@ links:
         - label: Hacker News
           url: https://news.ycombinator.com
 
-# Upcoming events from Niijima Calendar (CALENDAR_URL and CALENDAR_TOKEN in .env).
+# Upcoming events from Niijima Calendar (CALENDAR_URL and CALENDAR_TOKEN in .env),
+# for the strip's Calendar slot and the bigger Today section.
 today:
   days: 7 # how far ahead
-  limit: 8 # at most this many events
+  limit: 8 # at most this many events in Today
   link: https://calendar.niijimasisters.com
 
-# The money summary from Treasure (TREASURE_URL and SUMMARY_TOKEN in .env).
+# The money summary from Treasure (TREASURE_URL and SUMMARY_TOKEN in .env), for
+# the strip's Treasure slot and the bigger Treasury section.
 # Hide/Show on the page is remembered per device; hidden by default on phones.
 treasury:
-  bills: 3 # upcoming bills to list under the total (0–5)
+  bills: 3 # upcoming bills Treasury lists under the total (0–5)
   link: https://treasure.niijimasisters.com
 
 access:
