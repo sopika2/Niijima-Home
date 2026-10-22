@@ -7,10 +7,7 @@ describe('config.yml', () => {
 		const config = parseConfig(
 			readFileSync(new URL('../../../config.example.yml', import.meta.url), 'utf8')
 		);
-		expect(config.hosts).toEqual({
-			'makoto.niijimasisters.com': 'makoto',
-			'sae.niijimasisters.com': 'sae'
-		});
+		expect(config.hosts).toEqual({});
 		expect(config.network.length).toBeGreaterThan(3);
 		expect(config.links.shared.length).toBeGreaterThan(0);
 	});
