@@ -1,0 +1,39 @@
+# Niijima Home: one container behind your existing Traefik and Cloudflare Tunnel.
+#
+#   cp config.example.yml config.yml && cp .env.example .env   (then fill in .env)
+#   docker compose up -d --build
+#
+# It answers on three hosts: home.… follows the Makoto | Sae switch, makoto.… and sae.…
+# are each sister's own start page.
+
+services:
+  home:
+    build: .
+    image: niijima/home:latest
+    container_name: niijima-home
+    restart: unless-stopped
+    init: true
+    user: '${PUID:-1000}:${PGID:-1000}'
+    env_file: .env
+    volumes:
+      # This folder, read-only: the app reads config.yml from it and picks up edits by itself.
+      - ./:/app/settings:ro
+      # The icon cache for your links.
+      - ./data:/app/data
+      # Your own pictures: the host characters' art, custom link icons.
+      - ./assets:/app/assets:ro
+    networks:
+      # Traefik's network; Treasure and Calendar are on it too, so the app reaches
+      # them directly (http://niijima-treasure:3000, http://niijima-calendar:3000).
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK:-zipline_default}
+      - traefik.http.routers.home.rule=Host(`${APP_HOST:-home.niijimasisters.com}`) || Host(`${MAKOTO_HOST:-makoto.niijimasisters.com}`) || Host(`${SAE_HOST:-sae.niijimasisters.com}`)
+      - traefik.http.routers.home.entrypoints=${TRAEFIK_ENTRYPOINT:-web}
+      - traefik.http.services.home.loadbalancer.server.port=3000
+
+networks:
+  proxy:
+    name: ${TRAEFIK_NETWORK:-zipline_default}
+    external: true

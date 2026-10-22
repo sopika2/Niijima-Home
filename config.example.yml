@@ -1,0 +1,181 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Niijima Home · config.yml
+#
+#  What the start page shows. Copy this file to config.yml and change what you
+#  need; anything you leave out uses the value shown here. Edits are picked up
+#  within a few seconds: save, then reload the page. No restart needed.
+#  A typo keeps the last good version running and is logged:
+#    docker compose logs home
+# ─────────────────────────────────────────────────────────────────────────────
+
+title: Niijima Home # the browser tab's title
+timezone: Europe/Budapest # for the calendar, the greeting and Today
+
+# The weather on the calendar (open-meteo.com: free, no key). false hides it.
+weather:
+  latitude: 47.4979
+  longitude: 19.0402
+
+# Hosts that always show one sister's page (her colours, her greeting, her links,
+# her calendar and money). Any other host (home.niijimasisters.com) follows the
+# Makoto | Sae switch, which every Niijima site shares.
+hosts:
+  makoto.niijimasisters.com: makoto
+  sae.niijimasisters.com: sae
+
+# Which sections show, top to bottom. Leave one out to hide it. Search and
+# Network span the page; on a wide screen Links sits on the left and Today and
+# Treasury on the right. On a phone they stack in exactly this order.
+sections: [search, network, links, today, treasury]
+
+# Who greets you. Art is a picture you put in the ./assets folder next to this
+# file (PNG or WebP; a missing .webp falls back to the .png of the same name).
+# Without it a silhouette stands in. Lines are picked at random for the time of
+# day: morning 5–11, afternoon 12–17, evening 18–21, night 22–4, else "any".
+host:
+  makoto:
+    name: Makoto
+    art: /assets/host-makoto.webp
+    arcana: II
+    arcana_name: The Priestess
+    lines:
+      morning:
+        - Good morning. Let's plan the day before it plans us.
+        - Up early? Good. Breakfast first, then strategy.
+      afternoon:
+        - Afternoon check-in. How far down the list are we?
+        - Keep your focus. Small steps add up.
+      evening:
+        - Evening. Let's look back at what got done today.
+        - You did well today. Don't forget to eat properly.
+      night:
+        - It's late. Whatever it is, it will keep until morning.
+        - Still up? Get some sleep. That's the council president talking.
+      any:
+        - Ready when you are.
+  sae:
+    name: Sae
+    art: /assets/host-sae.webp
+    arcana: XX
+    arcana_name: Judgement
+    lines:
+      morning:
+        - Morning. Coffee first, then the case files.
+        - An early start. The prosecution never rests.
+      afternoon:
+        - Keep the facts in order and the rest follows.
+        - Don't let the details pile up. Deal with them now.
+      evening:
+        - Close the files you can. The rest waits for tomorrow.
+        - Another long day. I've earned a decent dinner.
+      night:
+        - Burning the midnight oil again? …So am I.
+        - It's late. Verdicts are better after sleep.
+      any:
+        - Let's hear it. What's on the docket?
+
+search:
+  engine: duckduckgo # duckduckgo · google · startpage · kagi · custom
+  # url: https://search.example.com/?q={q}   # for engine: custom; {q} is the words
+  bangs: true # "!w tokyo", "!yt …" go to DuckDuckGo whatever the engine
+  placeholder: Search or type an address
+
+# The Niijima services, as tiles with a live up/down dot. The server checks each
+# one every minute (a quick HEAD request): any answer counts as up, a 5xx or no
+# answer as down. `check` pings another address instead, e.g. the app's own
+# container on the Docker network, which is faster than going out through
+# Cloudflare; `check: false` never pings. `status: soon` shows a stamp instead.
+# accent: makoto (cyan) or sae (gold) colours the tile's shadow.
+network:
+  - id: landing
+    label: Network
+    url: https://niijimasisters.com
+    arcana: XXI
+    hint: The World
+  - id: treasure
+    label: Treasure
+    url: https://treasure.niijimasisters.com
+    check: http://niijima-treasure:3000/healthz
+    arcana: X
+    hint: Money
+  - id: calendar
+    label: Calendar
+    url: https://calendar.niijimasisters.com
+    check: http://niijima-calendar:3000/healthz
+    arcana: XIX
+    hint: Days
+  - id: archive
+    label: Archive
+    url: https://archive.niijimasisters.com
+    check: http://niijima-archive:3000/healthz
+    arcana: IX
+    hint: Records
+  - id: mementos
+    label: Mementos
+    url: https://mementos.niijimasisters.com
+    arcana: XVIII
+    hint: Images
+  - id: compendium
+    label: Compendium
+    url: https://compendium.niijimasisters.com
+    arcana: XI
+    hint: Wiki
+
+# Your own bookmarks, in groups. Each sister sees her own groups first, then the
+# shared ones. The first nine links open with the keys 1–9.
+# icon: auto (default) fetches the site's own icon once and keeps it in ./data;
+# letter draws a letter tile; or name a picture in ./assets, e.g. /assets/x.png.
+links:
+  makoto:
+    - group: Study
+      links:
+        - label: Wikipedia
+          url: https://en.wikipedia.org
+        - label: Jisho
+          url: https://jisho.org
+        - label: Khan Academy
+          url: https://www.khanacademy.org
+  sae:
+    - group: Work
+      links:
+        - label: EUR-Lex
+          url: https://eur-lex.europa.eu
+        - label: Wikipedia
+          url: https://en.wikipedia.org
+  shared:
+    - group: Daily
+      links:
+        - label: YouTube
+          url: https://www.youtube.com
+        - label: GitHub
+          url: https://github.com
+        - label: Discord
+          url: https://discord.com/app
+        - label: Gmail
+          url: https://mail.google.com
+    - group: News
+      links:
+        - label: BBC News
+          url: https://www.bbc.com/news
+        - label: Hacker News
+          url: https://news.ycombinator.com
+
+# Upcoming events from Niijima Calendar (CALENDAR_URL and CALENDAR_TOKEN in .env).
+today:
+  days: 7 # how far ahead
+  limit: 8 # at most this many events
+  link: https://calendar.niijimasisters.com
+
+# The money summary from Treasure (TREASURE_URL and SUMMARY_TOKEN in .env).
+# Hide/Show on the page is remembered per device; hidden by default on phones.
+treasury:
+  bills: 3 # upcoming bills to list under the total (0–5)
+  link: https://treasure.niijimasisters.com
+
+access:
+  # Discord accounts allowed to sign in (with ACCESS_MODE=discord). Find yours by
+  # signing in once (the page shows it), or in Discord: Settings → Advanced →
+  # Developer Mode, then right-click your name → Copy User ID. Quote it.
+  discord_user_ids: []
+  # discord_user_ids:
+  #   - '123456789012345678'

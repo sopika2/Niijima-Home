@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" data-persona="%nj.persona%">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="robots" content="noindex, nofollow" />
+		<meta name="referrer" content="no-referrer" />
+		<meta name="color-scheme" content="dark" />
+		<link rel="manifest" href="/manifest.webmanifest" />
+		<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="/icons/%nj.persona%-180.png" />
+		<script>
+			// Money shown or hidden, decided before the first paint so nothing jumps: your last
+			// choice on this device, otherwise hidden on phones and shown on computers.
+			try {
+				var m = localStorage.getItem('nj-home:money');
+				document.documentElement.dataset.money =
+					m === 'shown' || m === 'hidden'
+						? m
+						: matchMedia('(max-width: 759.98px), (pointer: coarse)').matches
+							? 'hidden'
+							: 'shown';
+			} catch (e) {
+				document.documentElement.dataset.money = 'hidden';
+			}
+		</script>
+		%sveltekit.head%
+	</head>
+	<body class="nj" data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>
