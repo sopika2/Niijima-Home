@@ -50,7 +50,7 @@ const optional = (value: string | undefined) => {
 const withoutSlash = (value: string | null) => value?.replace(/\/+$/, '') ?? null;
 
 function readSettings(): Settings {
-	const mode = optional(env.ACCESS_MODE) ?? 'discord';
+	const mode = optional(env.ACCESS_MODE) ?? 'off';
 	if (mode !== 'discord' && mode !== 'off') throw new Error('ACCESS_MODE must be discord or off');
 	return {
 		accessMode: mode,
@@ -79,7 +79,7 @@ function accessGate(settings: Settings, config: Config): AccessGate {
 
 function checkSignIn(settings: Settings, config: Config): void {
 	if (settings.accessMode === 'off') {
-		log('boot', 'ACCESS_MODE=off: anyone who can reach this page sees it. Local development only.');
+		log('boot', 'No sign-in (ACCESS_MODE=off): anyone who can reach this app gets in.');
 		return;
 	}
 	const missing = Object.entries({
